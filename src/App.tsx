@@ -246,8 +246,23 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Erreur déconnexion:', error);
+    }
+    // Force le reset complet de l'état
+    setSession(null);
+    setCampaigns([]);
+    setActiveCampaignId(null);
+    setActivePlatformId(null);
+    setActivePostId(null);
+  } catch (err) {
+    console.error('Erreur logout:', err);
+    // Force la déconnexion même en cas d'erreur
+    setSession(null);
+  }
+};
 
   // --- Export (JSON) - Still useful for backups ---
   const exportData = () => {
