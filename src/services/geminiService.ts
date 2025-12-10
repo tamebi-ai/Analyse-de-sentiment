@@ -6,7 +6,7 @@ const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   
   // Debug pour Vercel
-  console.log('🔍 Vérification de la clé API...');
+  console.log('Vérification de la clé API...');
   console.log('Environment MODE:', import.meta.env.MODE);
   console.log('Clé API présente:', !!apiKey);
   console.log('Longueur de la clé:', apiKey?.length || 0);
