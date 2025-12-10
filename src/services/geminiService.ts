@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CommentData } from "../types";
 
-// ✅ Fonction améliorée avec meilleur diagnostic
+// Fonction améliorée avec meilleur diagnostic
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   
@@ -12,7 +12,7 @@ const getClient = () => {
   console.log('Longueur de la clé:', apiKey?.length || 0);
   
   if (!apiKey) {
-    console.error('❌ VITE_GEMINI_API_KEY manquante !');
+    console.error('VITE_GEMINI_API_KEY manquante !');
     console.error('Variables disponibles:', Object.keys(import.meta.env));
     
     throw new Error(
@@ -23,7 +23,7 @@ const getClient = () => {
     );
   }
   
-  console.log('✅ Clé API chargée avec succès');
+  console.log('Clé API chargée avec succès');
   return new GoogleGenAI({ apiKey });
 };
 
@@ -125,7 +125,7 @@ export const processImage = async (
   file: File, 
   onProgress: (msg: string) => void
 ): Promise<CommentData[]> => {
-  // ✅ CORRECTION CRITIQUE : Tout dans le try-catch
+  // CORRECTION CRITIQUE : Tout dans le try-catch
   try {
     // Initialiser le client ICI, dans le try-catch
     const ai = getClient();
@@ -249,7 +249,7 @@ export const processImage = async (
     return results;
 
   } catch (error) {
-    console.error("❌ Error processing image:", error);
+    console.error(" Error processing image:", error);
     
     // Meilleur message d'erreur pour l'utilisateur
     if (error instanceof Error) {
