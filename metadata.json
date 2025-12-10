@@ -1,0 +1,5 @@
+{
+  "name": "Copy of CommentAI Analyzer",
+  "description": "A dashboard to extract, analyze, and visualize user sentiments from screenshots using Gemini 2.0 Flash.",
+  "requestFramePermissions": []
+}

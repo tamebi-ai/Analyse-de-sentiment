@@ -1,0 +1,31 @@
+{
+  "name": "commentai-analyzer",
+  "version": "1.0.0",
+  "description": "Sentiment Analysis Dashboard",
+  "main": "index.tsx",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@google/genai": "^1.32.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.7.2",
+    "tailwind-merge": "^1.14.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.18",
+    "typescript": "^5.0.0",
+    "vite": "^4.4.0"
+  }
+}
