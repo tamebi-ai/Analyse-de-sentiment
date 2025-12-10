@@ -1,15 +1,29 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CommentData } from "../types";
 
-// ✅ CORRECTION : Utilise import.meta.env au lieu de process.env
+// ✅ Fonction améliorée avec meilleur diagnostic
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   
+  // Debug pour Vercel
+  console.log('🔍 Vérification de la clé API...');
+  console.log('Environment MODE:', import.meta.env.MODE);
+  console.log('Clé API présente:', !!apiKey);
+  console.log('Longueur de la clé:', apiKey?.length || 0);
+  
   if (!apiKey) {
     console.error('❌ VITE_GEMINI_API_KEY manquante !');
-    throw new Error('Clé API Gemini non configurée. Ajoutez VITE_GEMINI_API_KEY dans vos variables d\'environnement.');
+    console.error('Variables disponibles:', Object.keys(import.meta.env));
+    
+    throw new Error(
+      'Clé API Gemini non configurée.\n\n' +
+      'Vérifiez que VITE_GEMINI_API_KEY est bien définie dans Vercel:\n' +
+      '1. Settings → Environment Variables\n' +
+      '2. Redéployez sans cache (décochez "Use existing build cache")'
+    );
   }
   
+  console.log('✅ Clé API chargée avec succès');
   return new GoogleGenAI({ apiKey });
 };
 
@@ -111,13 +125,15 @@ export const processImage = async (
   file: File, 
   onProgress: (msg: string) => void
 ): Promise<CommentData[]> => {
-  const ai = getClient();
-  const base64Data = await fileToGenerativePart(file);
-
-  onProgress(`Extraction du texte de ${file.name}...`);
-
-  // 1. Extract Comments
+  // ✅ CORRECTION CRITIQUE : Tout dans le try-catch
   try {
+    // Initialiser le client ICI, dans le try-catch
+    const ai = getClient();
+    const base64Data = await fileToGenerativePart(file);
+
+    onProgress(`Extraction du texte de ${file.name}...`);
+
+    // 1. Extract Comments
     const extractResponse = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: {
@@ -233,7 +249,13 @@ export const processImage = async (
     return results;
 
   } catch (error) {
-    console.error("Error processing image:", error);
+    console.error("❌ Error processing image:", error);
+    
+    // Meilleur message d'erreur pour l'utilisateur
+    if (error instanceof Error) {
+      throw new Error(`Erreur lors du traitement: ${error.message}`);
+    }
+    
     throw error;
   }
 };
