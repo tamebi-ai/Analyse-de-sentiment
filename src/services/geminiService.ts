@@ -1,8 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CommentData } from "../types";
 
-// Initialisation du client avec la clé API de l'environnement
-const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+// ✅ CORRECTION : Utilise import.meta.env au lieu de process.env
+const getClient = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    console.error('❌ VITE_GEMINI_API_KEY manquante !');
+    throw new Error('Clé API Gemini non configurée. Ajoutez VITE_GEMINI_API_KEY dans vos variables d\'environnement.');
+  }
+  
+  return new GoogleGenAI({ apiKey });
+};
 
 const EXTRACT_PROMPT = `Extract all user comments from this screenshot.
 Return the comments as a JSON array of strings.
