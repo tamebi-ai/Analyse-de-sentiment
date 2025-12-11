@@ -1,6 +1,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CommentData } from "../types";
 
+// 🔍 DEBUG - À SUPPRIMER APRÈS
+console.log('🔍 GEMINI API KEY CHECK:', {
+  exists: !!import.meta.env.VITE_GEMINI_API_KEY,
+  preview: import.meta.env.VITE_GEMINI_API_KEY?.substring(0, 10) + '...',
+  allEnvVars: Object.keys(import.meta.env)
+});
+
+
 // Fonction améliorée avec meilleur diagnostic
 const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
