@@ -1,38 +1,27 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { CommentData } from "../types";
 
-// 🔍 DEBUG - À SUPPRIMER APRÈS
-console.log('🔍 GEMINI API KEY CHECK:', {
-  exists: !!import.meta.env.VITE_GEMINI_API_KEY,
-  preview: import.meta.env.VITE_GEMINI_API_KEY?.substring(0, 10) + '...',
-  allEnvVars: Object.keys(import.meta.env)
-});
+// ✅ CORRECTION : Initialisation lazy - le client n'est créé que lors de l'appel
+let clientInstance: GoogleGenAI | null = null;
 
-
-// Fonction améliorée avec meilleur diagnostic
-const getClient = () => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  
-  // Debug pour Vercel
-  console.log('Vérification de la clé API...');
-  console.log('Environment MODE:', import.meta.env.MODE);
-  console.log('Clé API présente:', !!apiKey);
-  console.log('Longueur de la clé:', apiKey?.length || 0);
-  
-  if (!apiKey) {
-    console.error('VITE_GEMINI_API_KEY manquante !');
-    console.error('Variables disponibles:', Object.keys(import.meta.env));
+const getClient = (): GoogleGenAI => {
+  if (!clientInstance) {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     
-    throw new Error(
-      'Clé API Gemini non configurée.\n\n' +
-      'Vérifiez que VITE_GEMINI_API_KEY est bien définie dans Vercel:\n' +
-      '1. Settings → Environment Variables\n' +
-      '2. Redéployez sans cache (décochez "Use existing build cache")'
-    );
+    console.log('🔍 Initialisation Gemini:', {
+      apiKeyExists: !!apiKey,
+      apiKeyPreview: apiKey ? `${apiKey.substring(0, 10)}...` : 'MANQUANTE',
+      allEnvKeys: Object.keys(import.meta.env).filter(k => k.startsWith('VITE_'))
+    });
+    
+    if (!apiKey) {
+      throw new Error('❌ VITE_GEMINI_API_KEY manquante ! Ajoutez-la dans vos variables d\'environnement Vercel.');
+    }
+    
+    clientInstance = new GoogleGenAI({ apiKey });
   }
   
-  console.log('Clé API chargée avec succès');
-  return new GoogleGenAI({ apiKey });
+  return clientInstance;
 };
 
 const EXTRACT_PROMPT = `Extract all user comments from this screenshot.
@@ -88,13 +77,11 @@ const cleanJson = (text: string | undefined): string => {
   if (!text) return "";
   let clean = text.trim();
   
-  // 1. Try to extract from Markdown code blocks first
   const match = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
   if (match) {
     clean = match[1].trim();
   }
 
-  // 2. Locate the first '{' or '[' and the last '}' or ']'
   const firstOpenBrace = clean.indexOf('{');
   const firstOpenBracket = clean.indexOf('[');
   let startIndex = -1;
@@ -133,17 +120,15 @@ export const processImage = async (
   file: File, 
   onProgress: (msg: string) => void
 ): Promise<CommentData[]> => {
-  // CORRECTION CRITIQUE : Tout dans le try-catch
+  // Le client est créé ICI, au moment de l'appel, pas à l'import
+  const ai = getClient();
+  const base64Data = await fileToGenerativePart(file);
+
+  onProgress(`Extraction du texte de ${file.name}...`);
+
   try {
-    // Initialiser le client ICI, dans le try-catch
-    const ai = getClient();
-    const base64Data = await fileToGenerativePart(file);
-
-    onProgress(`Extraction du texte de ${file.name}...`);
-
-    // 1. Extract Comments
     const extractResponse = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: {
         parts: [
           { text: EXTRACT_PROMPT },
@@ -174,7 +159,6 @@ export const processImage = async (
 
     const results: CommentData[] = [];
 
-    // 2. Analyze each comment
     const batchSize = 5; 
     for (let i = 0; i < comments.length; i += batchSize) {
       const batch = comments.slice(i, i + batchSize);
@@ -257,13 +241,7 @@ export const processImage = async (
     return results;
 
   } catch (error) {
-    console.error(" Error processing image:", error);
-    
-    // Meilleur message d'erreur pour l'utilisateur
-    if (error instanceof Error) {
-      throw new Error(`Erreur lors du traitement: ${error.message}`);
-    }
-    
+    console.error("Error processing image:", error);
     throw error;
   }
 };
