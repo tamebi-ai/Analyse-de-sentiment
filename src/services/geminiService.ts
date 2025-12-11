@@ -135,7 +135,7 @@ export const processImage = async (
 
     // 1. Extract Comments
     const extractResponse = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash',
       contents: {
         parts: [
           { text: EXTRACT_PROMPT },
