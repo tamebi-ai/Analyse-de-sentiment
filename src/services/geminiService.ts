@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/generativie-ai";
 import { CommentData } from "../types";
 
 // ✅ CORRECTION : Initialisation lazy - le client n'est créé que lors de l'appel
@@ -15,7 +15,7 @@ const getClient = (): GoogleGenAI => {
     });
     
     if (!apiKey) {
-      throw new Error('❌ VITE_GEMINI_API_KEY manquante ! Ajoutez-la dans vos variables d\'environnement Vercel.');
+      throw new Error('VITE_GEMINI_API_KEY manquante ! Ajoutez-la dans vos variables d\'environnement Vercel.');
     }
     
     clientInstance = new GoogleGenAI({ apiKey });
